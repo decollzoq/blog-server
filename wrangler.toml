@@ -1,0 +1,12 @@
+name = "blog-server"
+main = "src/index.ts"
+compatibility_date = "2026-08-26"
+
+# Node.js 호환성 플래그
+compatibility_flags = ["nodejs_compat"]
+
+# D1 데이터베이스 바인딩 설정
+[[d1_databases]]
+binding = "DB"                                       # Hono 코드(c.env.DB)에서 접근할 변수명
+database_name = "blog-db"                            # npx wrangler d1 create 시 지정한 DB 이름
+database_id = "cfccc391-e610-44fb-bf5a-a365f3f366c9" # 터미널 생성 결과로 나온 본인의 UUID 입력
