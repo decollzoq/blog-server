@@ -88,15 +88,25 @@ app.get("/api/posts/:slug", async (c) => {
 
         // 이전 글 & 다음 글 조회 (카테고리 연계)
         const prevPostRow: any = await c.env.DB.prepare(
-            "SELECT title, slug, id FROM posts WHERE id < ? ORDER BY id DESC LIMIT 1",
+            `SELECT title, slug, id 
+             FROM posts 
+             WHERE category = ? 
+               AND (created_at < ? OR (created_at = ? AND id < ?))
+             ORDER BY created_at DESC, id DESC 
+             LIMIT 1`,
         )
-            .bind(post.id)
+            .bind(post.category, post.created_at, post.created_at, post.id)
             .first();
 
         const nextPostRow: any = await c.env.DB.prepare(
-            "SELECT title, slug, id FROM posts WHERE id > ? ORDER BY id ASC LIMIT 1",
+            `SELECT title, slug, id 
+             FROM posts 
+             WHERE category = ? 
+               AND (created_at > ? OR (created_at = ? AND id > ?))
+             ORDER BY created_at ASC, id ASC 
+             LIMIT 1`,
         )
-            .bind(post.id)
+            .bind(post.category, post.created_at, post.created_at, post.id)
             .first();
 
         // 프론트엔드 Post 타입으로 변환
