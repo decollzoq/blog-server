@@ -38,10 +38,10 @@ app.get("/api/posts", async (c) => {
         let stmt;
 
         if (category && category !== "all") {
-            query += " WHERE category = ? ORDER BY id DESC";
+            query += " WHERE category = ? ORDER BY created_at DESC, id DESC";
             stmt = c.env.DB.prepare(query).bind(category);
         } else {
-            query += " ORDER BY id DESC";
+            query += " ORDER BY created_at DESC, id DESC";
             stmt = c.env.DB.prepare(query);
         }
 
