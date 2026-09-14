@@ -23,6 +23,8 @@ app.get("/api/categories", async (c) => {
             count: row.count,
         }));
 
+        c.header("Cache-Control", "public, max-age=60, s-maxage=600");
+
         return c.json({success: true, data: categories});
     } catch (error: any) {
         return c.json({success: false, message: error.message}, 500);
@@ -62,6 +64,7 @@ app.get("/api/posts", async (c) => {
                 : [],
         }));
 
+        c.header("Cache-Control", "public, max-age=60, s-maxage=600");
         return c.json({success: true, data: posts});
     } catch (error: any) {
         return c.json({success: false, message: error.message}, 500);
@@ -138,6 +141,7 @@ app.get("/api/posts/:slug", async (c) => {
                 : null,
         };
 
+        c.header("Cache-Control", "public, max-age=60, s-maxage=600");
         return c.json({success: true, data: postDetail});
     } catch (error: any) {
         return c.json({success: false, message: error.message}, 500);
