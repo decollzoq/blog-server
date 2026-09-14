@@ -7,8 +7,39 @@ type Bindings = {
 
 const app = new Hono<{Bindings: Bindings}>();
 
-// 1. CORS 전체 허용
-app.use("*", cors());
+app.use(
+    "/api/*",
+    cors({
+        origin: (origin) => {
+            // 1) 로컬 개발 환경 허용
+            if (
+                origin.startsWith("http://localhost:") ||
+                origin.startsWith("http://127.0.0.1:")
+            ) {
+                return origin;
+            }
+
+            // 2) 프로덕션 도메인 허용
+            if (origin === "https://seon-blog.pages.dev") {
+                return origin;
+            }
+
+            // 3) Cloudflare Pages의 모든 프리뷰/배포 도메인 허용 (*.seon-blog.pages.dev 또는 *.pages.dev)
+            if (
+                origin.endsWith(".seon-blog.pages.dev") ||
+                origin.endsWith(".pages.dev")
+            ) {
+                return origin;
+            }
+
+            // 허용되지 않은 출처는 차단
+            return null;
+        },
+        allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allowHeaders: ["Content-Type", "Authorization"],
+        maxAge: 86400, // Preflight(OPTIONS) 요청 결과를 24시간 동안 브라우저에 캐싱
+    }),
+);
 
 // 2. 카테고리 목록 및 글 개수 조회 (GET /api/categories)
 app.get("/api/categories", async (c) => {
