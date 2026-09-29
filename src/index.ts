@@ -120,9 +120,9 @@ app.get("/api/posts/:slug", async (c) => {
             );
         }
 
-        // 이전 글 & 다음 글 조회 (카테고리 연계)
+        // 이전 글 조회 (필요한 메타데이터 컬럼 추가)
         const prevPostRow: any = await c.env.DB.prepare(
-            `SELECT title, slug, id 
+            `SELECT id, slug, thumbnail, title, category, tags, created_at 
              FROM posts 
              WHERE category = ? 
                AND (created_at < ? OR (created_at = ? AND id < ?))
@@ -132,8 +132,9 @@ app.get("/api/posts/:slug", async (c) => {
             .bind(post.category, post.created_at, post.created_at, post.id)
             .first();
 
+        // 다음 글 조회 (필요한 메타데이터 컬럼 추가)
         const nextPostRow: any = await c.env.DB.prepare(
-            `SELECT title, slug, id 
+            `SELECT id, slug, thumbnail, title, category, tags, created_at 
              FROM posts 
              WHERE category = ? 
                AND (created_at > ? OR (created_at = ? AND id > ?))
@@ -143,13 +144,32 @@ app.get("/api/posts/:slug", async (c) => {
             .bind(post.category, post.created_at, post.created_at, post.id)
             .first();
 
+        // 보조 함수: row -> PostSummary 포맷 변환
+        const formatSummary = (row: any) => {
+            if (!row) return null;
+            return {
+                id: String(row.id),
+                slug: row.slug || String(row.id),
+                thumbnail:
+                    row.thumbnail ||
+                    "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80",
+                title: row.title,
+                createdAt: row.created_at,
+                categoryName: row.category,
+                categorySlug: row.category,
+                tags: row.tags
+                    ? row.tags.split(",").map((t: string) => t.trim())
+                    : [],
+            };
+        };
+
         // 프론트엔드 Post 타입으로 변환
         const postDetail = {
             id: String(post.id),
             slug: post.slug || String(post.id),
             thumbnail:
                 post.thumbnail ||
-                "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80",
+                "https://pub-2f92c27057714311905f9e85b5ed5a1b.r2.dev/%E1%84%80%E1%85%B5%E1%84%87%E1%85%A9%E1%86%AB.webp",
             title: post.title,
             content: post.content,
             createdAt: post.created_at,
@@ -158,18 +178,8 @@ app.get("/api/posts/:slug", async (c) => {
             tags: post.tags
                 ? post.tags.split(",").map((t: string) => t.trim())
                 : [],
-            prevPost: prevPostRow
-                ? {
-                      title: prevPostRow.title,
-                      slug: prevPostRow.slug || String(prevPostRow.id),
-                  }
-                : null,
-            nextPost: nextPostRow
-                ? {
-                      title: nextPostRow.title,
-                      slug: nextPostRow.slug || String(nextPostRow.id),
-                  }
-                : null,
+            prevPost: formatSummary(prevPostRow),
+            nextPost: formatSummary(nextPostRow),
         };
 
         c.header("Cache-Control", "public, max-age=60, s-maxage=600");
