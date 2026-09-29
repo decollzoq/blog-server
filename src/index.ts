@@ -152,7 +152,7 @@ app.get("/api/posts/:slug", async (c) => {
                 slug: row.slug || String(row.id),
                 thumbnail:
                     row.thumbnail ||
-                    "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80",
+                    "https://pub-2f92c27057714311905f9e85b5ed5a1b.r2.dev/%E1%84%80%E1%85%B5%E1%84%87%E1%85%A9%E1%86%AB.webp",
                 title: row.title,
                 createdAt: row.created_at,
                 categoryName: row.category,
